@@ -26,9 +26,9 @@ vim.cmd([[set mouse=i]])
 
 vim.cmd([[colorscheme catppuccin]])
 
+require("core.plugins")
 require("core.fzf")
 require("core.keymaps")
-require("core.plugins")
 require("core.wilder")
 require("core.lsp")
 require("core.treesitter")
