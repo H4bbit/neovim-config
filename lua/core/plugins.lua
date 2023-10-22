@@ -22,7 +22,7 @@ return require("packer").startup(function(use)
 		end,
 	})
 	use("norcalli/nvim-colorizer.lua")
-	--wildmenu inproved
+	--WILDMENU INPROVED
 	use("gelguy/wilder.nvim")
 
 	--FZF
@@ -46,8 +46,7 @@ return require("packer").startup(function(use)
 
 	-- THEME
 	use({ "catppuccin/nvim", as = "catppuccin" })
-	use("marko-cerovac/material.nvim")
-	-- LINE AND ICONS
+	-- LUALINE AND ICONS
 	use("nvim-tree/nvim-web-devicons")
 	use("arkav/lualine-lsp-progress")
 	use("nvim-lualine/lualine.nvim")

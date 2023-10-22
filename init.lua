@@ -24,13 +24,16 @@ vim.cmd([[set nowrap]])
 
 vim.cmd([[set mouse=i]])
 
-vim.cmd([[colorscheme catppuccin]])
-
+local status_ok, err = pcall(vim.cmd, [[colorscheme catppuccin]])
+if not status_ok then
+	print("error while load catppuccin theme")
+	print(err)
+end
 require("core.plugins")
-require("core.fzf")
+require("core.lsp")
 require("core.keymaps")
 require("core.wilder")
-require("core.lsp")
+require("core.fzf")
 require("core.treesitter")
 require("core.trouble")
 require("core.lualine")
