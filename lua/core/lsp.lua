@@ -65,6 +65,7 @@ local servers = {
     "jedi_language_server",
     "rust_analyzer",
     "lua_ls",
+    "ts_ls"
 }
 
 for _, lsp in ipairs(servers) do
