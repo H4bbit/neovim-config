@@ -34,7 +34,7 @@ require("core.fzf")
 require("core.treesitter")
 require("core.trouble")
 require("core.lualine")
-require("core.null_ls")
+require("core.none_ls")
 require("core.rust")
 
 require("colorizer").setup({})

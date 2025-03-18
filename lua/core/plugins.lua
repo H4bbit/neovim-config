@@ -46,7 +46,7 @@ require('pckr').add{
     "ibhagwan/fzf-lua",
     "romgrk/fzy-lua-native",
     "nvim-lua/plenary.nvim",
-    "jose-elias-alvarez/null-ls.nvim",
+    "nvimtools/none-ls.nvim", 
     "folke/trouble.nvim",
     "neovim/nvim-lspconfig",
     "hrsh7th/nvim-cmp",
