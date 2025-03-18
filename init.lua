@@ -24,11 +24,8 @@ vim.cmd([[set nowrap]])
 
 vim.cmd([[set mouse=i]])
 
-local status_ok, err = pcall(vim.cmd, [[colorscheme catppuccin]])
-if not status_ok then
-	print("error while load catppuccin theme")
-	print(err)
-end
+vim.opt.termguicolors = true
+
 require("core.plugins")
 require("core.lsp")
 require("core.keymaps")

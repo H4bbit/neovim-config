@@ -1,64 +1,69 @@
-local ensure_packer = function()
-	local fn = vim.fn
-	local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-	if fn.empty(fn.glob(install_path)) > 0 then
-		fn.system({ "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
-		vim.cmd([[packadd packer.nvim]])
-		return true
-	end
-	return false
+--pckr version
+local function bootstrap_pckr()
+  local pckr_path = vim.fn.stdpath("data") .. "/pckr/pckr.nvim"
+
+  if not (vim.uv or vim.loop).fs_stat(pckr_path) then
+    vim.fn.system({
+      'git',
+      'clone',
+      "--filter=blob:none",
+      'https://github.com/lewis6991/pckr.nvim',
+      pckr_path
+    })
+  end
+
+  vim.opt.rtp:prepend(pckr_path)
 end
 
-local packer_bootstrap = ensure_packer()
+bootstrap_pckr()
 
-return require("packer").startup(function(use)
-	use("wbthomason/packer.nvim")
-
-	use({
+require('pckr').add{
+    {
 		"nvim-treesitter/nvim-treesitter",
 		run = function()
 			local ts_update = require("nvim-treesitter.install").update({ with_sync = true })
 			ts_update()
 		end,
-	})
-	use("norcalli/nvim-colorizer.lua")
-	--WILDMENU INPROVED
-	use("gelguy/wilder.nvim")
+	},
+    {
+        "kiddos/gemini.nvim",
+        config = function()
+            require('gemini').setup({
+                    hints = {
+                        enabled = true,
+                        insert_result_key = '<M-l>',
+                    },
+                    completion = {
+                        enabled = true,
+                        insert_result_key = '<M-l>',
+                    }
+            })
+        end,
 
-	--FZF
-	use("ibhagwan/fzf-lua")
-	use("romgrk/fzy-lua-native")
-
-	use("nvim-lua/plenary.nvim")
-	use("jose-elias-alvarez/null-ls.nvim")
-	--DIAGNOSTICS AND DEFINITIOMS
-	use("folke/trouble.nvim")
-
-	-- LSP AND SNIPPETS
-	use("neovim/nvim-lspconfig")
-	use("hrsh7th/nvim-cmp")
-	use("hrsh7th/cmp-buffer")
-	use("hrsh7th/cmp-path")
-	use("hrsh7th/cmp-nvim-lsp")
-	use("L3MON4D3/LuaSnip")
-	use("saadparwaiz1/cmp_luasnip")
-	use("rafamadriz/friendly-snippets")
-
-	-- THEME
-	use({ "catppuccin/nvim", as = "catppuccin" })
-	-- LUALINE AND ICONS
-	use("nvim-tree/nvim-web-devicons")
-	use("arkav/lualine-lsp-progress")
-	use("nvim-lualine/lualine.nvim")
-	--IDNENT GUIDE
-	use("lukas-reineke/indent-blankline.nvim")
-	-- rust plugins
-	use("rust-lang/rust.vim")
-	use("simrat39/rust-tools.nvim")
-
-	-- Automatically set up your configuration after cloning packer.nvim
-	-- Put this at the end after all plugins
-	if packer_bootstrap then
-		require("packer").sync()
-	end
-end)
+    },
+    "norcalli/nvim-colorizer.lua",
+    "gelguy/wilder.nvim",
+    "ibhagwan/fzf-lua",
+    "romgrk/fzy-lua-native",
+    "nvim-lua/plenary.nvim",
+    "jose-elias-alvarez/null-ls.nvim",
+    "folke/trouble.nvim",
+    "neovim/nvim-lspconfig",
+    "hrsh7th/nvim-cmp",
+    "hrsh7th/cmp-buffer",
+    "hrsh7th/cmp-path",
+    "hrsh7th/cmp-nvim-lsp",
+    "L3MON4D3/LuaSnip",
+    "saadparwaiz1/cmp_luasnip",
+    "rafamadriz/friendly-snippets",
+    {"catppuccin/nvim", config = function()
+        vim.cmd.colorscheme "catppuccin"
+    end,},
+    "nvim-tree/nvim-web-devicons",
+    "arkav/lualine-lsp-progress",
+    "nvim-lualine/lualine.nvim",
+    "lukas-reineke/indent-blankline.nvim",
+    "rust-lang/rust.vim",
+    "simrat39/rust-tools.nvim",
+                    
+}
