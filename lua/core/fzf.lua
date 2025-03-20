@@ -1,9 +1,11 @@
 require("fzf-lua").setup({
 	{ "fzf-native" },
-
+    winopts = {
 	preview_border = "noborder",
-	--	default_previewer = "bat",
+    },
+    --default_previewer = "bat",
 })
+
 --[[    winopts = {
         split = 'belowright new',
         win_row = 1,
