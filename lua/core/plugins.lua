@@ -63,6 +63,9 @@ require('pckr').add{
     "arkav/lualine-lsp-progress",
     "nvim-lualine/lualine.nvim",
     "lukas-reineke/indent-blankline.nvim",
+    {"lewis6991/gitsigns.nvim",config = function()
+        require('gitsigns').setup()
+    end},
     "rust-lang/rust.vim",
     "simrat39/rust-tools.nvim",
                     
