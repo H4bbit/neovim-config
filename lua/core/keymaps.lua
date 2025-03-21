@@ -10,7 +10,7 @@ end
 Map("n", "<leader>h", ":nohlsearch<CR>")
 
 -- buffer navigation
---Map("n", "<TAB>", ":bn<CR>")
+Map("n", "<TAB>", ":bn<CR>")
 --Map("n", "<S-TAB>", ":bp<CR>")
 Map("n", "<leader>d", ":bd<CR>")
 
