@@ -13,10 +13,11 @@ end
 
 cmp.setup({
     sources = cmp.config.sources({
-        { name = "luasnip" },
         { name = "buffer",  keyword_length = 3 },
-        { name = "nvim_lsp" },
+        --        { name = "minuet" },
         { name = "path",    keyword_length = 2 },
+        { name = "luasnip" },
+        { name = "nvim_lsp" },
     }),
     preselect = "aways", --"item",
     completion = {
@@ -63,9 +64,11 @@ local servers = {
     "clangd",
     --"pyright",
     "jedi_language_server",
-    "rust_analyzer",
+    --"rust_analyzer",
     "lua_ls",
-    "ts_ls"
+    "tsserver",
+    --    "ocamllsp",
+    --    "html",
 }
 
 for _, lsp in ipairs(servers) do
