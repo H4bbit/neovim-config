@@ -139,6 +139,31 @@ require("pckr").add({
     "rust-lang/rust.vim",
     --    "simrat39/rust-tools.nvim",
     --    "mrcjkb/rustaceanvim",
+    "mfussenegger/nvim-dap",
+    {
+        "igorlfs/nvim-dap-view",
+        dependencies = { "mfussenegger/nvim-dap" },
+        config = function()
+            require("dap-view").setup({
+                winbar = {
+                    controls = {
+                        enabled = true,
+                        position = "left",
+                    },
+                    sections = {
+                        "console",
+                        "scopes",
+                        "breakpoints",
+                        "threads",
+                        "repl",
+                        "watches" }
+                },
+            })
+        end,
+        keys = {
+            { "<F7>", "<cmd>DapViewToggle<CR>", desc = "Toggle DAP View" },
+        },
+    },
     {
         'mrcjkb/rustaceanvim',
         lazy = false,

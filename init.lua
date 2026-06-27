@@ -28,6 +28,7 @@ vim.opt.termguicolors = true
 
 require("core.plugins")
 require("core.lsp")
+require("core.dap")
 require("core.keymaps")
 require("core.wilder")
 require("core.fzf")
