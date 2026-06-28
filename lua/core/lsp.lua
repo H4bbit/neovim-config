@@ -1,8 +1,7 @@
-local lspconfig = require("lspconfig")
 local cmp = require("cmp")
 local luasnip = require("luasnip")
---local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
+-- 1. Configuração do LuaSnip
 require("luasnip.loaders.from_vscode").lazy_load()
 luasnip.config.setup({})
 
@@ -11,26 +10,24 @@ local check_backspace = function()
     return col == 0 or vim.fn.getline("."):sub(col, col):match("%s")
 end
 
+-- 2. Configuração do nvim-cmp
 cmp.setup({
     sources = cmp.config.sources({
         { name = "buffer",  keyword_length = 3 },
-        --        { name = "minuet" },
+        -- { name = "minuet" },
         { name = "path",    keyword_length = 2 },
         { name = "luasnip" },
         { name = "nvim_lsp" },
     }),
-    preselect = "aways", --"item",
+    preselect = "always",
     completion = {
         completeopt = "menu,menuone,noinsert",
     },
-
     snippet = {
         expand = function(args)
             luasnip.lsp_expand(args.body)
         end,
     },
-    --	{ name = "buffer" },
-
     mapping = cmp.mapping.preset.insert({
         ["<C-n>"] = cmp.mapping.select_next_item(),
         ["<C-p>"] = cmp.mapping.select_prev_item(),
@@ -48,7 +45,7 @@ cmp.setup({
                 luasnip.expand_or_jump()
             elseif luasnip.expandable() then
                 luasnip.expand()
-            elseif check_backspace then
+            elseif check_backspace() then
                 fallback()
             else
                 fallback()
@@ -57,26 +54,45 @@ cmp.setup({
     }),
 })
 
+-- 3. Capabilities do nvim-cmp para os servidores LSP
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
+-- 4. Nova Configuração de Servidores LSP (Neovim >= 0.12)
 local servers = {
     "clangd",
-    --"pyright",
     "jedi_language_server",
-    --"rust_analyzer",
     "lua_ls",
-    "tsserver",
-    --    "ocamllsp",
-    --    "html",
+    "ts_ls", -- Atualizado: tsserver foi renomeado para ts_ls
 }
 
-for _, lsp in ipairs(servers) do
-    lspconfig[lsp].setup({
-        -- on_attach = my_custom_on_attach,
+for _, server in ipairs(servers) do
+    -- Adiciona as configurações extras (capabilities do cmp) ao servidor
+    vim.lsp.config(server, {
         capabilities = capabilities,
     })
+
+    -- Habilita o servidor com a nova API
+    vim.lsp.enable(server)
 end
 
---format on save
-vim.cmd([[autocmd BufWritePre <buffer> lua vim.lsp.buf.format()]])
+-- 5. Format on Save (A abordagem correta e moderna)
+vim.api.nvim_create_autocmd("LspAttach", {
+    group = vim.api.nvim_create_augroup("LspFormatOnSave", { clear = true }),
+    callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        local bufnr = args.buf
+
+        -- Verifica se o servidor atual suporta formatação de documento
+        if client and client.server_capabilities.documentFormattingProvider then
+            -- Cria o evento de salvar atrelado apenas a este buffer específico
+            vim.api.nvim_create_autocmd("BufWritePre", {
+                group = vim.api.nvim_create_augroup("LspFormat_" .. bufnr, { clear = true }),
+                buffer = bufnr,
+                callback = function()
+                    vim.lsp.buf.format({ bufnr = bufnr, id = client.id, async = false })
+                end,
+            })
+        end
+    end,
+})

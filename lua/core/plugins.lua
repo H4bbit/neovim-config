@@ -17,105 +17,34 @@ end
 bootstrap_pckr()
 
 require("pckr").add({
-    --[[
+    -- UI & Aparência
     {
-        "nvim-treesitter/nvim-treesitter",
-        run = function()
-            local ts_update = require("nvim-treesitter.install").update({ with_sync = true })
-            ts_update()
-        end,
-    },
-    --]]
-    --[[
-    {
-        "milanglacier/minuet-ai.nvim",
-
+        "catppuccin/nvim",
         config = function()
-            require('minuet').setup {
-                provider = 'openai_fim_compatible',
-
-                throttle = 1000,
-                debounce = 400,
-
-                provider_options = {
-                    openai_fim_compatible = {
-                        api_key = 'MISTRAL_API_KEY',
-
-                        model = 'codestral-latest',
-
-                        end_point =
-                        'https://api.mistral.ai/v1/fim/completions',
-
-                        stream = false,
-
-                        optional = {
-                            max_tokens = 64,
-                            stop = { '\n\n' },
-                        },
-                    },
-                },
-
-                virtualtext = {
-                    auto_trigger_ft = { '*' },
-
-                    keymap = {
-                        accept = '<C-y>',
-                        next = '<A-[>',
-                        prev = '<A-]>',
-                        dismiss = '<C-e>',
-                    },
-                },
-            }
+            vim.cmd.colorscheme("catppuccin")
         end,
     },
-    --]]
-    --[[
-    {
-        "olimorris/codecompanion.nvim",
-        config = function()
-            require("codecompanion").setup({
-                interactions = {
-                    chat = {
-                        adapter = "gemini",
-                    },
-                    inline = {
-                        adapter = "gemini",
-                    },
-                    cmd = {
-                        adapter = "gemini",
-                    },
-                },
-            })
-        end,
-    },
-    --]]
-    --[[
-	{
-		"kiddos/gemini.nvim",
-		config = function()
-			require("gemini").setup({
-				hints = {
-					enabled = true,
-					insert_result_key = "<M-l>",
-				},
-				completion = {
-					enabled = true,
-					insert_result_key = "<M-l>",
-				},
-			})
-		end,
-	},
-    --]]
-    "vim-crystal/vim-crystal",
-    --    "github/copilot.vim.git",
     "norcalli/nvim-colorizer.lua",
-    "gelguy/wilder.nvim",
+    "lukas-reineke/indent-blankline.nvim",
+    "arkav/lualine-lsp-progress",
+    "nvim-lualine/lualine.nvim",
+
+    -- Navegação, Busca e Utilidades
     "ibhagwan/fzf-lua",
     "romgrk/fzy-lua-native",
+    "gelguy/wilder.nvim",
     "nvim-lua/plenary.nvim",
-    "nvimtools/none-ls.nvim",
     "folke/trouble.nvim",
-    "neovim/nvim-lspconfig",
+    {
+        "lewis6991/gitsigns.nvim",
+        config = function()
+            require("gitsigns").setup()
+        end,
+    },
+
+    -- LSP, Autocomplete e Snippets
+    "neovim/nvim-lspconfig", -- MANTIDO: Fornece as "receitas" para o vim.lsp.enable()
+    "nvimtools/none-ls.nvim",
     "hrsh7th/nvim-cmp",
     "hrsh7th/cmp-buffer",
     "hrsh7th/cmp-path",
@@ -123,69 +52,28 @@ require("pckr").add({
     "L3MON4D3/LuaSnip",
     "saadparwaiz1/cmp_luasnip",
     "rafamadriz/friendly-snippets",
-    {
-        "catppuccin/nvim",
-        config = function()
-            vim.cmd.colorscheme("catppuccin")
-        end,
-    },
-    "arkav/lualine-lsp-progress",
-    "nvim-lualine/lualine.nvim",
-    "lukas-reineke/indent-blankline.nvim",
-    {
-        "lewis6991/gitsigns.nvim",
-        config = function()
-            require("gitsigns").setup()
-        end,
-    },
+
+    -- Linguagens Específicas
+    "vim-crystal/vim-crystal",
     "rust-lang/rust.vim",
-    --    "simrat39/rust-tools.nvim",
-    --    "mrcjkb/rustaceanvim",
-    "mfussenegger/nvim-dap",
     {
-        "igorlfs/nvim-dap-view",
-        dependencies = { "mfussenegger/nvim-dap" },
-        config = function()
-            require("dap-view").setup({
-                winbar = {
-                    controls = {
-                        enabled = true,
-                        position = "left",
-                    },
-                    sections = {
-                        "console",
-                        "scopes",
-                        "breakpoints",
-                        "threads",
-                        "repl",
-                        "watches" }
-                },
-            })
-        end,
-        keys = {
-            { "<F7>", "<cmd>DapViewToggle<CR>", desc = "Toggle DAP View" },
-        },
-    },
-    {
-        'mrcjkb/rustaceanvim',
+        "mrcjkb/rustaceanvim",
         lazy = false,
         config = function()
             vim.g.rustaceanvim = {
                 server = {
                     on_attach = function(client, bufnr)
                     end,
-                    -- A utilização de default_settings garante que as configurações do workspace sejam respeitadas
                     default_settings = {
                         ['rust-analyzer'] = {
                             checkOnSave = true,
                             cargo = {
                                 allFeatures = true,
-                                --TODO: target explicito apenas em builds no contexto do ndk
-                                --target = "aarch64-linux-android",
+                                -- TODO: target explicito apenas em builds no contexto do ndk
+                                -- target = "aarch64-linux-android",
                             },
                             check = {
                                 command = "clippy",
-                                -- Adiciona a flag de target explicitamente aos argumentos do comando interno
                                 extraArgs = { "--", "-W", "clippy::pedantic" },
                             },
                         },
@@ -193,6 +81,23 @@ require("pckr").add({
                 },
             }
         end,
-    }
+    },
 
+    -- Debugging (DAP)
+    "mfussenegger/nvim-dap",
+    {
+        "igorlfs/nvim-dap-view",
+        dependencies = { "mfussenegger/nvim-dap" },
+        config = function()
+            require("dap-view").setup({
+                winbar = {
+                    controls = { enabled = true, position = "left" },
+                    sections = { "console", "scopes", "breakpoints", "threads", "repl", "watches" }
+                },
+            })
+        end,
+        keys = {
+            { "<F7>", "<cmd>DapViewToggle<CR>", desc = "Toggle DAP View" },
+        },
+    },
 })
