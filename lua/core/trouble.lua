@@ -1,18 +1,16 @@
-require 'nvim-web-devicons'.setup {}
-require("trouble").setup {
-    icons = true,
-    use_diagnostic_signs = true,
-}
+require("nvim-web-devicons").setup({})
 
+-- Setup do Trouble V3 (as opções padrão já são suficientes na maioria dos casos)
+require("trouble").setup({})
 
-local signs = {
-    Error = " ",
-    Warn = " ",
-    Hint = " ",
-    Info = " ",
-}
-
-for type, icon in pairs(signs) do
-    local hl = "DiagnosticSign" .. type
-    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-end
+-- Definição moderna de ícones de diagnóstico (Neovim >= 0.10)
+vim.diagnostic.config({
+    signs = {
+        text = {
+            [vim.diagnostic.severity.ERROR] = " ",
+            [vim.diagnostic.severity.WARN]  = " ",
+            [vim.diagnostic.severity.INFO]  = " ",
+            [vim.diagnostic.severity.HINT]  = " ",
+        },
+    },
+})
