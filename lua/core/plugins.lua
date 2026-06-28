@@ -26,13 +26,11 @@ require("pckr").add({
     },
     "norcalli/nvim-colorizer.lua",
     "lukas-reineke/indent-blankline.nvim",
-    "arkav/lualine-lsp-progress",
     "nvim-lualine/lualine.nvim",
 
     -- Navegação, Busca e Utilidades
     "ibhagwan/fzf-lua",
-    "romgrk/fzy-lua-native",
-    "gelguy/wilder.nvim",
+    "hrsh7th/cmp-cmdline",
     "nvim-lua/plenary.nvim",
     "folke/trouble.nvim",
     {

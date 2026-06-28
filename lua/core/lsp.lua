@@ -54,6 +54,24 @@ cmp.setup({
     }),
 })
 
+-- 2.5 Configuração do nvim-cmp para Linha de Comando (Substitui o wilder)
+cmp.setup.cmdline({ '/', '?' }, {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+        { name = 'buffer' }
+    }
+})
+
+cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+        { name = 'path' }
+    }, {
+        { name = 'cmdline' }
+    }),
+    matching = { disallow_symbol_nonprefix_matching = false }
+})
+
 -- 3. Capabilities do nvim-cmp para os servidores LSP
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
@@ -82,7 +100,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(args)
         local client = vim.lsp.get_client_by_id(args.data.client_id)
         local bufnr = args.buf
-
         -- Verifica se o servidor atual suporta formatação de documento
         if client and client.server_capabilities.documentFormattingProvider then
             -- Cria o evento de salvar atrelado apenas a este buffer específico
@@ -96,3 +113,4 @@ vim.api.nvim_create_autocmd("LspAttach", {
         end
     end,
 })
+
