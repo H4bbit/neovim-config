@@ -10,8 +10,8 @@ end
 Map("n", "<leader>h", ":nohlsearch<CR>")
 
 -- buffer navigation
-Map("n", "<TAB>", ":bn<CR>")
-Map("n", "<leader>d", ":bd<CR>")
+Map("n", "<leader>bn", ":bn<CR>")
+Map("n", "<leader>bd", ":bd<CR>")
 
 -- move lines (normal mode)
 Map("n", "<leader>j", ":m .+1<CR>")

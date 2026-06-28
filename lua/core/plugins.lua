@@ -17,6 +17,7 @@ end
 bootstrap_pckr()
 
 require("pckr").add({
+    --[[
     {
         "nvim-treesitter/nvim-treesitter",
         run = function()
@@ -24,6 +25,7 @@ require("pckr").add({
             ts_update()
         end,
     },
+    --]]
     --[[
     {
         "milanglacier/minuet-ai.nvim",
@@ -178,7 +180,8 @@ require("pckr").add({
                             checkOnSave = true,
                             cargo = {
                                 allFeatures = true,
-                                target = "aarch64-linux-android",
+                                --TODO: target explicito apenas em builds no contexto do ndk
+                                --target = "aarch64-linux-android",
                             },
                             check = {
                                 command = "clippy",
