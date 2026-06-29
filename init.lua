@@ -12,6 +12,17 @@ opt.autowrite = true
 opt.autoread = true
 opt.showcmd = true
 
+opt.inccommand = "split"
+
+opt.splitbelow = true
+opt.splitright = true
+
+opt.ignorecase = true
+opt.smartcase = true
+
+opt.swapfile = false
+opt.backup = false
+
 -- Indentação
 opt.tabstop = 4
 opt.softtabstop = 4
@@ -25,6 +36,9 @@ opt.completeopt = "menuone,noselect"
 
 -- Aparência
 opt.termguicolors = true
+opt.colorcolumn = "0"
+opt.signcolumn = "yes"
+vim.o.cmdheight = 0
 
 -- Leaders
 vim.g.mapleader = " "
