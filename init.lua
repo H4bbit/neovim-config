@@ -32,7 +32,7 @@ opt.expandtab = true
 opt.backspace = { "indent", "eol", "start" }
 
 -- Completion
-opt.completeopt = "menuone,noselect"
+opt.completeopt = "menuone,noselect,fuzzy,nosort"
 
 -- Aparência
 opt.termguicolors = true
@@ -47,10 +47,9 @@ vim.g.maplocalleader = " "
 -- Core
 require("core.plugins")
 
+require("core.treesitter")
 require("core.lsp")
 require("core.dap")
-require("core.treesitter")
-require("core.none_ls")
 require("core.rust")
 
 require("core.fzf")
@@ -61,3 +60,4 @@ require("core.keymaps")
 
 -- Plugins sem módulo próprio
 require("colorizer").setup({})
+require("vim._core.ui2").enable({})
