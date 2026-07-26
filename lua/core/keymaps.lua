@@ -1,11 +1,11 @@
 function Map(mode, lhs, rhs, opts)
-    local options = { noremap = true, silent = true }
+	local options = { noremap = true, silent = true }
 
-    if opts then
-        options = vim.tbl_extend("force", options, opts)
-    end
+	if opts then
+		options = vim.tbl_extend("force", options, opts)
+	end
 
-    vim.keymap.set(mode, lhs, rhs, options)
+	vim.keymap.set(mode, lhs, rhs, options)
 end
 
 -- ============================================================================
@@ -36,12 +36,7 @@ Map("n", "<C-u>", "<C-u>zz", { desc = "Half-page up and center cursor" })
 Map("n", "n", "nzzzv", { desc = "Next search result centered" })
 Map("n", "N", "Nzzzv", { desc = "Previous search result centered" })
 
-Map(
-    "n",
-    "<leader>s",
-    [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-    { desc = "Replace word under cursor" }
-)
+Map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word under cursor" })
 
 -- ============================================================================
 -- Terminal
@@ -114,58 +109,67 @@ Map("n", "<leader>duc", dap_view.close, { desc = "Close DAP view" })
 -- debug helper
 -------------------------------------------------------
 function P(opts)
-    print(vim.inspect(opts))
+	print(vim.inspect(opts))
 end
 
 -------------------------------------------------------
 -- LSP attach
 -------------------------------------------------------
 vim.api.nvim_create_autocmd("LspAttach", {
-    group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-    callback = function(ev)
-        vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+	group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+	callback = function(ev)
+		vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
-        local opts = { buffer = ev.buf }
+		local opts = { buffer = ev.buf }
 
-        Map("n", "gd", vim.lsp.buf.definition,
-            vim.tbl_extend("force", opts, { desc = "Go to definition" }))
+		Map("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
 
-        Map("n", "gD", vim.lsp.buf.declaration,
-            vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
+		Map("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
 
-        Map("n", "gi", vim.lsp.buf.implementation,
-            vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
+		Map("n", "gi", vim.lsp.buf.implementation, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
 
-        Map("n", "gr", vim.lsp.buf.references,
-            vim.tbl_extend("force", opts, { desc = "List references" }))
+		Map("n", "gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "List references" }))
 
-        Map("n", "K", vim.lsp.buf.hover,
-            vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
+		Map("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
 
-        Map("n", "<leader>H", vim.lsp.buf.signature_help,
-            vim.tbl_extend("force", opts, { desc = "Signature help" }))
+		Map("n", "<leader>H", vim.lsp.buf.signature_help, vim.tbl_extend("force", opts, { desc = "Signature help" }))
 
-        Map("n", "<leader>rn", vim.lsp.buf.rename,
-            vim.tbl_extend("force", opts, { desc = "Rename symbol" }))
+		Map("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename symbol" }))
 
-        Map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action,
-            vim.tbl_extend("force", opts, { desc = "Code actions" }))
+		Map(
+			{ "n", "v" },
+			"<leader>ca",
+			vim.lsp.buf.code_action,
+			vim.tbl_extend("force", opts, { desc = "Code actions" })
+		)
 
-        Map("n", "<leader>D", vim.lsp.buf.type_definition,
-            vim.tbl_extend("force", opts, { desc = "Go to type definition" }))
+		Map(
+			"n",
+			"<leader>D",
+			vim.lsp.buf.type_definition,
+			vim.tbl_extend("force", opts, { desc = "Go to type definition" })
+		)
 
-        Map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder,
-            vim.tbl_extend("force", opts, { desc = "Add workspace folder" }))
+		Map(
+			"n",
+			"<leader>wa",
+			vim.lsp.buf.add_workspace_folder,
+			vim.tbl_extend("force", opts, { desc = "Add workspace folder" })
+		)
 
-        Map("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder,
-            vim.tbl_extend("force", opts, { desc = "Remove workspace folder" }))
+		Map(
+			"n",
+			"<leader>wr",
+			vim.lsp.buf.remove_workspace_folder,
+			vim.tbl_extend("force", opts, { desc = "Remove workspace folder" })
+		)
 
-        Map("n", "<leader>wl", function()
-            P(vim.lsp.buf.list_workspace_folders())
-        end, vim.tbl_extend("force", opts, { desc = "List workspace folders" }))
+		Map("n", "<leader>wl", function()
+			P(vim.lsp.buf.list_workspace_folders())
+		end, vim.tbl_extend("force", opts, { desc = "List workspace folders" }))
 
-        Map("n", "F", function()
-            vim.lsp.buf.format({ async = true })
-        end, vim.tbl_extend("force", opts, { desc = "Format buffer" }))
-    end,
+		Map("n", "F", function()
+			vim.lsp.buf.format({ async = true })
+		end, vim.tbl_extend("force", opts, { desc = "Format buffer" }))
+	end,
 })

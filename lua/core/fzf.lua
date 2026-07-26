@@ -1,6 +1,6 @@
 require("fzf-lua").setup({
-    { "fzf-native" },
-    winopts = {
-        preview_border = "noborder",
-    },
+	{ "fzf-native" },
+	winopts = {
+		preview_border = "noborder",
+	},
 })
