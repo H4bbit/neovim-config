@@ -25,7 +25,12 @@ require("pckr").add({
 		end,
 	},
 	"norcalli/nvim-colorizer.lua",
-	"lukas-reineke/indent-blankline.nvim",
+	{
+		"lukas-reineke/indent-blankline.nvim",
+		config = function()
+			require("ibl").setup()
+		end,
+	},
 	"nvim-lualine/lualine.nvim",
 
 	-- Navegação, Busca e Utilidades
