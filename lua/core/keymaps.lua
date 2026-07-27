@@ -1,20 +1,27 @@
 local utils = require("core.utils")
-local map = utils.map
+local fzf = require("fzf-lua")
+local dap = require("dap")
+local dap_view = require("dap-view.actions")
 
+local map = utils.map
+local lsp_opts = utils.lsp_opts
+local diagnostic = vim.diagnostic
+local cmd = vim.cmd
+local buf = vim.lsp.buf
 -- ============================================================================
 -- Editor
 -- ============================================================================
 
 map("n", "<leader>h", ":nohlsearch<CR>", { desc = "Clear search highlight" })
 
-map("n", "<leader>bn", ":bn<CR>", { desc = "Next buffer" })
-map("n", "<leader>bd", ":bd<CR>", { desc = "Delete buffer" })
+map("n", "<leader>bn", cmd.bnext, { desc = "Next buffer" })
+map("n", "<leader>bd", cmd.bdelete, { desc = "Delete buffer" })
 
-map("n", "<leader>j", ":m .+1<CR>", { desc = "Move line down" })
-map("n", "<leader>k", ":m .-2<CR>", { desc = "Move line up" })
+map("n", "<leader>j", "<cmd>m .+1<CR>", { desc = "Move line down" })
+map("n", "<leader>k", "<cmd>m .-2<CR>", { desc = "Move line up" })
 
-map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
-map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
+map("v", "J", "<cmd>m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
+map("v", "K", "<cmd>m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
 
 map("v", "<", "<gv", { desc = "Unindent and keep selection" })
 map("v", ">", ">gv", { desc = "Indent and keep selection" })
@@ -46,11 +53,11 @@ map("t", "<C-l>", "<cmd>wincmd l<CR>", { desc = "Terminal: focus right window" }
 -- Window Management
 -- ============================================================================
 
-map("n", "<C-Up>", ":resize -2<CR>", { desc = "Decrease window height" })
-map("n", "<C-Down>", ":resize +2<CR>", { desc = "Increase window height" })
+map("n", "<C-Up>", "<cmd>resize -2<CR>", { desc = "Decrease window height" })
+map("n", "<C-Down>", "<cmd>resize +2<CR>", { desc = "Increase window height" })
 
-map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width" })
-map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
+map("n", "<C-Left>", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width" })
+map("n", "<C-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increase window width" })
 
 map("n", "<C-h>", "<C-w>h", { desc = "Focus left window" })
 map("n", "<C-j>", "<C-w>j", { desc = "Focus lower window" })
@@ -60,8 +67,6 @@ map("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
 -- ============================================================================
 -- FZF
 -- ============================================================================
-
-local fzf = require("fzf-lua")
 
 map("n", "<leader>b", fzf.buffers, { desc = "Find buffers" })
 map("n", "<leader>f", fzf.files, { desc = "Find files" })
@@ -73,16 +78,15 @@ map("n", "<leader>l", fzf.blines, { desc = "Search current buffer" })
 -- Diagnostics
 -- ============================================================================
 
-map("n", "<leader>o", vim.diagnostic.open_float, { desc = "Show diagnostics" })
-map("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
-map("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
-map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Diagnostics to location list" })
+map("n", "<leader>o", diagnostic.open_float, { desc = "Show diagnostics" })
+map("n", "[d", diagnostic.goto_prev, { desc = "Previous diagnostic" })
+map("n", "]d", diagnostic.goto_next, { desc = "Next diagnostic" })
+map("n", "<leader>q", diagnostic.setloclist, { desc = "Diagnostics to location list" })
 
 -- ============================================================================
 -- DAP
 -- ============================================================================
 
-local dap = require("dap")
 
 map("n", "<leader>db", dap.toggle_breakpoint, { desc = "Toggle breakpoint" })
 map("n", "<leader>dc", dap.continue, { desc = "Continue debugging" })
@@ -93,7 +97,6 @@ map("n", "<leader>do", dap.step_over, { desc = "Step over" })
 -- DAP View
 -- ============================================================================
 
-local dap_view = require("dap-view.actions")
 
 map("n", "<leader>du", dap_view.toggle, { desc = "Toggle DAP view" })
 map("n", "<leader>duo", dap_view.open, { desc = "Open DAP view" })
@@ -102,61 +105,56 @@ map("n", "<leader>duc", dap_view.close, { desc = "Close DAP view" })
 -------------------------------------------------------
 -- LSP attach
 -------------------------------------------------------
-vim.api.nvim_create_autocmd("LspAttach", {
-    group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+
+
+utils.autocmd("LspAttach", {
+    group = utils.augroup("UserLspConfig"),
     callback = function(ev)
         vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
         local opts = { buffer = ev.buf }
 
-        map("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
+        local function lmap(mode, lhs, rhs, desc)
+            map(mode, lhs, rhs, lsp_opts(opts, desc))
+        end
 
-        map("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
+        lmap("n", "gd", buf.definition, "Go to definition")
+        lmap("n", "gD", buf.declaration, "Go to declaration")
+        lmap("n", "gi", buf.implementation, "Go to implementation")
+        lmap("n", "gr", buf.references, "List references")
+        lmap("n", "K", buf.hover, "Hover documentation")
 
-        map("n", "gi", vim.lsp.buf.implementation, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
+        lmap("n", "<leader>H", buf.signature_help, "Signature help")
 
-        map("n", "gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "List references" }))
+        lmap("n", "<leader>rn", buf.rename, "Rename symbol")
 
-        map("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
-
-        map("n", "<leader>H", vim.lsp.buf.signature_help, vim.tbl_extend("force", opts, { desc = "Signature help" }))
-
-        map("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename symbol" }))
-
-        map(
+        lmap(
             { "n", "v" },
             "<leader>ca",
-            vim.lsp.buf.code_action,
-            vim.tbl_extend("force", opts, { desc = "Code actions" })
-        )
-
-        map(
+            buf.code_action,
+            "Code actions")
+        lmap(
             "n",
             "<leader>D",
-            vim.lsp.buf.type_definition,
-            vim.tbl_extend("force", opts, { desc = "Go to type definition" })
-        )
-
-        map(
+            buf.type_definition,
+            "Go to type definition")
+        lmap(
             "n",
             "<leader>wa",
-            vim.lsp.buf.add_workspace_folder,
-            vim.tbl_extend("force", opts, { desc = "Add workspace folder" })
-        )
-
-        map(
+            buf.add_workspace_folder,
+            "Add workspace folder")
+        lmap(
             "n",
             "<leader>wr",
-            vim.lsp.buf.remove_workspace_folder,
-            vim.tbl_extend("force", opts, { desc = "Remove workspace folder" })
-        )
+            buf.remove_workspace_folder,
+            "Remove workspace folder")
 
-        map("n", "<leader>wl", function()
-            vim.print(vim.lsp.buf.list_workspace_folders())
-        end, vim.tbl_extend("force", opts, { desc = "List workspace folders" }))
+        lmap("n", "<leader>wl", function()
+            vim.print(buf.list_workspace_folders())
+        end, "List workspace folders")
 
-        map("n", "F", function()
-            vim.lsp.buf.format({ async = true })
-        end, vim.tbl_extend("force", opts, { desc = "Format buffer" }))
+        lmap("n", "F", function()
+            buf.format({ async = true })
+        end, "Format buffer")
     end,
 })
