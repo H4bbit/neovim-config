@@ -85,10 +85,10 @@ map("n", "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>", { des
 map("n", "<leader>cs", "<cmd>Trouble symbols toggle focus=false<CR>", { desc = "Symbols (Trouble)" })
 
 map(
-    "n",
-    "<leader>cl",
-    "<cmd>Trouble lsp toggle focus=false win.position=right<CR>",
-    { desc = "LSP references (Trouble)" }
+	"n",
+	"<leader>cl",
+	"<cmd>Trouble lsp toggle focus=false win.position=right<CR>",
+	{ desc = "LSP references (Trouble)" }
 )
 
 map("n", "<leader>xL", "<cmd>Trouble loclist toggle<CR>", { desc = "Location list (Trouble)" })
@@ -100,21 +100,21 @@ map("n", "<leader>xQ", "<cmd>Trouble qflist toggle<CR>", { desc = "Quickfix list
 
 map("n", "<leader>o", diagnostic.open_float, { desc = "Show diagnostics" })
 map("n", "[d", function()
-    diagnostic.jump({
-        count = -1,
-        float = true,
-    })
+	diagnostic.jump({
+		count = -1,
+		float = true,
+	})
 end, {
-    desc = "Previous diagnostic",
+	desc = "Previous diagnostic",
 })
 
 map("n", "]d", function()
-    diagnostic.jump({
-        count = 1,
-        float = true,
-    })
+	diagnostic.jump({
+		count = 1,
+		float = true,
+	})
 end, {
-    desc = "Next diagnostic",
+	desc = "Next diagnostic",
 })
 -- ============================================================================
 -- DAP
@@ -138,37 +138,37 @@ map("n", "<leader>duc", dap_view.close, { desc = "Close DAP view" })
 -------------------------------------------------------
 
 utils.autocmd("LspAttach", {
-    group = utils.augroup("UserLspConfig"),
-    callback = function(ev)
-        vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+	group = utils.augroup("UserLspConfig"),
+	callback = function(ev)
+		vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
-        local opts = { buffer = ev.buf }
+		local opts = { buffer = ev.buf }
 
-        local function lmap(mode, lhs, rhs, desc)
-            map(mode, lhs, rhs, lsp_opts(opts, desc))
-        end
+		local function lmap(mode, lhs, rhs, desc)
+			map(mode, lhs, rhs, lsp_opts(opts, desc))
+		end
 
-        lmap("n", "gd", buf.definition, "Go to definition")
-        lmap("n", "gD", buf.declaration, "Go to declaration")
-        lmap("n", "gi", buf.implementation, "Go to implementation")
-        lmap("n", "gr", buf.references, "List references")
-        lmap("n", "K", buf.hover, "Hover documentation")
+		lmap("n", "gd", buf.definition, "Go to definition")
+		lmap("n", "gD", buf.declaration, "Go to declaration")
+		lmap("n", "gi", buf.implementation, "Go to implementation")
+		lmap("n", "gr", buf.references, "List references")
+		lmap("n", "K", buf.hover, "Hover documentation")
 
-        lmap("n", "<leader>H", buf.signature_help, "Signature help")
+		lmap("n", "<leader>H", buf.signature_help, "Signature help")
 
-        lmap("n", "<leader>rn", buf.rename, "Rename symbol")
+		lmap("n", "<leader>rn", buf.rename, "Rename symbol")
 
-        lmap({ "n", "v" }, "<leader>ca", buf.code_action, "Code actions")
-        lmap("n", "<leader>D", buf.type_definition, "Go to type definition")
-        lmap("n", "<leader>wa", buf.add_workspace_folder, "Add workspace folder")
-        lmap("n", "<leader>wr", buf.remove_workspace_folder, "Remove workspace folder")
+		lmap({ "n", "v" }, "<leader>ca", buf.code_action, "Code actions")
+		lmap("n", "<leader>D", buf.type_definition, "Go to type definition")
+		lmap("n", "<leader>wa", buf.add_workspace_folder, "Add workspace folder")
+		lmap("n", "<leader>wr", buf.remove_workspace_folder, "Remove workspace folder")
 
-        lmap("n", "<leader>wl", function()
-            vim.print(buf.list_workspace_folders())
-        end, "List workspace folders")
+		lmap("n", "<leader>wl", function()
+			vim.print(buf.list_workspace_folders())
+		end, "List workspace folders")
 
-        lmap("n", "F", function()
-            buf.format({ async = true })
-        end, "Format buffer")
-    end,
+		lmap("n", "F", function()
+			buf.format({ async = true })
+		end, "Format buffer")
+	end,
 })
