@@ -75,18 +75,50 @@ map("n", "<leader>t", fzf.tabs, { desc = "List tabs" })
 map("n", "<leader>l", fzf.blines, { desc = "Search current buffer" })
 
 -- ============================================================================
+-- Trouble
+-- ============================================================================
+
+map("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<CR>", { desc = "Diagnostics (Trouble)" })
+
+map("n", "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>", { desc = "Buffer diagnostics (Trouble)" })
+
+map("n", "<leader>cs", "<cmd>Trouble symbols toggle focus=false<CR>", { desc = "Symbols (Trouble)" })
+
+map(
+    "n",
+    "<leader>cl",
+    "<cmd>Trouble lsp toggle focus=false win.position=right<CR>",
+    { desc = "LSP references (Trouble)" }
+)
+
+map("n", "<leader>xL", "<cmd>Trouble loclist toggle<CR>", { desc = "Location list (Trouble)" })
+
+map("n", "<leader>xQ", "<cmd>Trouble qflist toggle<CR>", { desc = "Quickfix list (Trouble)" })
+-- ============================================================================
 -- Diagnostics
 -- ============================================================================
 
 map("n", "<leader>o", diagnostic.open_float, { desc = "Show diagnostics" })
-map("n", "[d", diagnostic.goto_prev, { desc = "Previous diagnostic" })
-map("n", "]d", diagnostic.goto_next, { desc = "Next diagnostic" })
-map("n", "<leader>q", diagnostic.setloclist, { desc = "Diagnostics to location list" })
+map("n", "[d", function()
+    diagnostic.jump({
+        count = -1,
+        float = true,
+    })
+end, {
+    desc = "Previous diagnostic",
+})
 
+map("n", "]d", function()
+    diagnostic.jump({
+        count = 1,
+        float = true,
+    })
+end, {
+    desc = "Next diagnostic",
+})
 -- ============================================================================
 -- DAP
 -- ============================================================================
-
 
 map("n", "<leader>db", dap.toggle_breakpoint, { desc = "Toggle breakpoint" })
 map("n", "<leader>dc", dap.continue, { desc = "Continue debugging" })
@@ -97,7 +129,6 @@ map("n", "<leader>do", dap.step_over, { desc = "Step over" })
 -- DAP View
 -- ============================================================================
 
-
 map("n", "<leader>du", dap_view.toggle, { desc = "Toggle DAP view" })
 map("n", "<leader>duo", dap_view.open, { desc = "Open DAP view" })
 map("n", "<leader>duc", dap_view.close, { desc = "Close DAP view" })
@@ -105,7 +136,6 @@ map("n", "<leader>duc", dap_view.close, { desc = "Close DAP view" })
 -------------------------------------------------------
 -- LSP attach
 -------------------------------------------------------
-
 
 utils.autocmd("LspAttach", {
     group = utils.augroup("UserLspConfig"),
@@ -128,26 +158,10 @@ utils.autocmd("LspAttach", {
 
         lmap("n", "<leader>rn", buf.rename, "Rename symbol")
 
-        lmap(
-            { "n", "v" },
-            "<leader>ca",
-            buf.code_action,
-            "Code actions")
-        lmap(
-            "n",
-            "<leader>D",
-            buf.type_definition,
-            "Go to type definition")
-        lmap(
-            "n",
-            "<leader>wa",
-            buf.add_workspace_folder,
-            "Add workspace folder")
-        lmap(
-            "n",
-            "<leader>wr",
-            buf.remove_workspace_folder,
-            "Remove workspace folder")
+        lmap({ "n", "v" }, "<leader>ca", buf.code_action, "Code actions")
+        lmap("n", "<leader>D", buf.type_definition, "Go to type definition")
+        lmap("n", "<leader>wa", buf.add_workspace_folder, "Add workspace folder")
+        lmap("n", "<leader>wr", buf.remove_workspace_folder, "Remove workspace folder")
 
         lmap("n", "<leader>wl", function()
             vim.print(buf.list_workspace_folders())
