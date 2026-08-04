@@ -32,7 +32,6 @@ require("pckr").add({
 		end,
 	},
 	"nvim-lualine/lualine.nvim",
-
 	-- Navegação, Busca e Utilidades
 	"ibhagwan/fzf-lua",
 	"hrsh7th/cmp-cmdline",
@@ -44,7 +43,16 @@ require("pckr").add({
 			require("gitsigns").setup()
 		end,
 	},
-
+	{
+		"stevearc/oil.nvim",
+		config = function()
+			require("oil").setup()
+		end,
+	},
+	{
+		"benomahony/oil-git.nvim",
+		requires = { "stevearc/oil.nvim" },
+	},
 	-- LSP, Autocomplete e Snippets
 	"neovim/nvim-lspconfig", -- MANTIDO: Fornece as "receitas" para o vim.lsp.enable()
 	"hrsh7th/nvim-cmp",
