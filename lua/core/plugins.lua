@@ -44,6 +44,16 @@ require("pckr").add({
 		end,
 	},
 	{
+		"NeogitOrg/neogit",
+		requires = {
+			"nvim-lua/plenary.nvim",
+			"sindrets/diffview.nvim",
+		},
+		config = function()
+			require("neogit").setup()
+		end,
+	},
+	{
 		"stevearc/oil.nvim",
 		config = function()
 			require("oil").setup()
