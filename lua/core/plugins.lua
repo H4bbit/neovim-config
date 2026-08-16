@@ -53,6 +53,9 @@ require("pckr").add({
 		"benomahony/oil-git.nvim",
 		requires = { "stevearc/oil.nvim" },
 	},
+	{
+		"stevearc/overseer.nvim",
+	},
 	-- LSP, Autocomplete e Snippets
 	"neovim/nvim-lspconfig", -- MANTIDO: Fornece as "receitas" para o vim.lsp.enable()
 	"hrsh7th/nvim-cmp",
