@@ -109,6 +109,7 @@ local servers = {
 	"ruff",
 	"ts_ls", -- Atualizado: tsserver foi renomeado para ts_ls
 	"biome",
+	"elmls",
 }
 
 vim.lsp.config("lua_ls", {
