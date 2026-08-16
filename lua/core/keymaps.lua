@@ -8,6 +8,9 @@ local lsp_opts = utils.lsp_opts
 local diagnostic = vim.diagnostic
 local cmd = vim.cmd
 local buf = vim.lsp.buf
+
+map("n", "-", "<cmd>Oil<CR>", { desc = "Open parent directory" })
+
 -- ============================================================================
 -- Editor
 -- ============================================================================
@@ -68,13 +71,31 @@ map("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
 -- FZF
 -- ============================================================================
 
-map("n", "<leader>b", fzf.buffers, { desc = "Find buffers" })
-map("n", "<leader>f", fzf.files, { desc = "Find files" })
-map("n", "<leader>g", fzf.live_grep, { desc = "Live grep" })
-map("n", "<leader>t", fzf.tabs, { desc = "List tabs" })
-map("n", "<leader>l", fzf.blines, { desc = "Search current buffer" })
+map("n", "<leader>ff", fzf.files, { desc = "Find files" })
+map("n", "<leader>fb", fzf.buffers, { desc = "Find buffers" })
+map("n", "<leader>fg", fzf.live_grep, { desc = "Live grep" })
+map("n", "<leader>ft", fzf.tabs, { desc = "List tabs" })
+map("n", "<leader>fl", fzf.blines, { desc = "Search current buffer" })
+
+map("n", "<leader>fr", fzf.oldfiles, { desc = "Recent files" })
+map("n", "<leader>fc", fzf.commands, { desc = "Find commands" })
+map("n", "<leader>fk", fzf.keymaps, { desc = "Find keymaps" })
+map("n", "<leader>fh", fzf.helptags, { desc = "Find help tags" })
+map("n", "<leader>fm", fzf.marks, { desc = "Find marks" })
+map("n", "<leader>fj", fzf.jumps, { desc = "Find jumps" })
 
 -- ============================================================================
+-- Git
+-- ============================================================================
+
+map("n", "<leader>gg", "<cmd>Neogit<CR>", { desc = "Open Neogit" })
+map("n", "<leader>gd", "<cmd>DiffviewOpen<CR>", { desc = "Open Diffview" })
+map("n", "<leader>gh", "<cmd>DiffviewFileHistory<CR>", { desc = "Git file history" })
+map("n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" })
+map("n", "<leader>gf", "<cmd>DiffviewFileHistory %<CR>", {
+	desc = "Current file history",
+})
+-- ==========================================================================`
 -- Trouble
 -- ============================================================================
 
@@ -94,6 +115,7 @@ map(
 map("n", "<leader>xL", "<cmd>Trouble loclist toggle<CR>", { desc = "Location list (Trouble)" })
 
 map("n", "<leader>xQ", "<cmd>Trouble qflist toggle<CR>", { desc = "Quickfix list (Trouble)" })
+
 -- ============================================================================
 -- Diagnostics
 -- ============================================================================
@@ -116,6 +138,7 @@ map("n", "]d", function()
 end, {
 	desc = "Next diagnostic",
 })
+
 -- ============================================================================
 -- DAP
 -- ============================================================================
@@ -124,15 +147,15 @@ map("n", "<leader>db", dap.toggle_breakpoint, { desc = "Toggle breakpoint" })
 map("n", "<leader>dc", dap.continue, { desc = "Continue debugging" })
 map("n", "<leader>di", dap.step_into, { desc = "Step into" })
 map("n", "<leader>do", dap.step_over, { desc = "Step over" })
+map("n", "<leader>dt", dap.terminate, { desc = "Terminate debugging" })
+map("n", "<leader>du", dap.step_out, { desc = "Step out" })
+map("n", "<leader>dr", dap.restart, { desc = "Restart debugging" })
 
 -- ============================================================================
 -- DAP View
 -- ============================================================================
 
-map("n", "<leader>du", dap_view.toggle, { desc = "Toggle DAP view" })
-map("n", "<leader>duo", dap_view.open, { desc = "Open DAP view" })
-map("n", "<leader>duc", dap_view.close, { desc = "Close DAP view" })
-
+map("n", "<leader>dv", dap_view.toggle, { desc = "Toggle DAP view" })
 -------------------------------------------------------
 -- LSP attach
 -------------------------------------------------------
@@ -148,27 +171,28 @@ utils.autocmd("LspAttach", {
 			map(mode, lhs, rhs, lsp_opts(opts, desc))
 		end
 
+		-- Navigation
 		lmap("n", "gd", buf.definition, "Go to definition")
 		lmap("n", "gD", buf.declaration, "Go to declaration")
 		lmap("n", "gi", buf.implementation, "Go to implementation")
 		lmap("n", "gr", buf.references, "List references")
 		lmap("n", "K", buf.hover, "Hover documentation")
 
-		lmap("n", "<leader>H", buf.signature_help, "Signature help")
+		-- LSP
+		lmap("n", "<leader>lh", buf.signature_help, "Signature help")
+		lmap("n", "<leader>lr", buf.rename, "Rename symbol")
+		lmap({ "n", "v" }, "<leader>la", buf.code_action, "Code actions")
+		lmap("n", "<leader>ld", buf.type_definition, "Go to type definition")
+		lmap("n", "<leader>lf", function()
+			buf.format({ async = true })
+		end, "Format buffer")
 
-		lmap("n", "<leader>rn", buf.rename, "Rename symbol")
-
-		lmap({ "n", "v" }, "<leader>ca", buf.code_action, "Code actions")
-		lmap("n", "<leader>D", buf.type_definition, "Go to type definition")
+		-- Workspace
 		lmap("n", "<leader>wa", buf.add_workspace_folder, "Add workspace folder")
 		lmap("n", "<leader>wr", buf.remove_workspace_folder, "Remove workspace folder")
 
 		lmap("n", "<leader>wl", function()
 			vim.print(buf.list_workspace_folders())
 		end, "List workspace folders")
-
-		lmap("n", "F", function()
-			buf.format({ async = true })
-		end, "Format buffer")
 	end,
 })

@@ -134,8 +134,5 @@ require("pckr").add({
 				},
 			})
 		end,
-		keys = {
-			{ "<F7>", "<cmd>DapViewToggle<CR>", desc = "Toggle DAP View" },
-		},
 	},
 })
