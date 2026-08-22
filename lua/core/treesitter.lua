@@ -91,7 +91,6 @@ function TS_Select.apply_selection(node)
 	end)
 end
 
--- Mapeamentos de Seleção Incremental (conforme sua configuração original)
-vim.keymap.set({ "n", "x" }, "<CR>", TS_Select.inc, { desc = "TS: Iniciar/Incrementar Seleção" })
-vim.keymap.set({ "n", "x" }, "<TAB>", TS_Select.inc, { desc = "TS: Incrementar Escopo (Alias)" })
-vim.keymap.set("x", "<BS>", TS_Select.dec, { desc = "TS: Decrementar Seleção" })
+-- Mapeamentos de Seleção Incremental
+vim.keymap.set({ "n", "x" }, "<leader>si", TS_Select.inc, { desc = "TS: Iniciar/Incrementar Seleção" })
+vim.keymap.set("x", "<leader>sd", TS_Select.dec, { desc = "TS: Decrementar Seleção" })
