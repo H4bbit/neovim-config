@@ -4,6 +4,8 @@
 
 local M = {}
 
+M.context_lines = 5
+
 local function rel_path(path)
   if path == "" or path == nil then return "[No Name]" end
   local rel = vim.fn.fnamemodify(path, ":~:.")
@@ -91,6 +93,23 @@ function M.get(bufnr, opts)
   local ft = vim.bo[buf].filetype or ""
   local cursor = get_cursor()
   local sel = get_selection(buf, opts)
+  local snippet = nil
+  if not sel then
+    local total = vim.api.nvim_buf_line_count(buf)
+    if total > 0 then
+      local before = M.context_lines or 5
+      local after = M.context_lines or 5
+      if opts and opts.context_lines ~= nil then before = opts.context_lines; after = opts.context_lines end
+      local cur_line = cursor.line
+      local s_line = math.max(1, cur_line - before)
+      local e_line = math.min(total, cur_line + after)
+      if s_line <= e_line then
+        local lines = vim.api.nvim_buf_get_lines(buf, s_line - 1, e_line, false)
+        local range = s_line == e_line and tostring(s_line) or string.format("%d-%d", s_line, e_line)
+        snippet = { range = range, lines = lines, s_line = s_line, e_line = e_line }
+      end
+    end
+  end
   return {
     buf = buf,
     path = path,
@@ -98,6 +117,7 @@ function M.get(bufnr, opts)
     filetype = ft,
     cursor = cursor,
     selection = sel,
+    snippet = snippet,
   }
 end
 
@@ -120,6 +140,14 @@ function M.format(ctx, opts)
     end
     table.insert(out, "```")
     table.insert(out, "</selection>")
+  elseif ctx.snippet and ctx.snippet.lines then
+    table.insert(out, string.format('<snippet range="%s">', ctx.snippet.range))
+    table.insert(out, string.format("```%s", ft ~= "" and ft or "text"))
+    for _, l in ipairs(ctx.snippet.lines) do
+      table.insert(out, l)
+    end
+    table.insert(out, "```")
+    table.insert(out, "</snippet>")
   end
   table.insert(out, "</context>")
   return table.concat(out, "\n")
