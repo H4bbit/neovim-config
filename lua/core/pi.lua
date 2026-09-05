@@ -46,6 +46,7 @@ local function ensure_win()
     title = " pi ",
     title_pos = "center",
   })
+  -- q para fechar, <Esc> também
   pcall(vim.keymap.set, "n", "q", function()
     if state.win and vim.api.nvim_win_is_valid(state.win) then
       vim.api.nvim_win_close(state.win, true)
@@ -58,10 +59,14 @@ end
 local function append(delta)
   local buf = ensure_buf()
   ensure_win()
+  -- append deve rodar no main loop; on_stdout já está no main loop mas
+  -- usamos vim.schedule para garantir não bloquear callback rápido
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(buf) then return end
+    -- pega última linha atual para concatenar delta que pode não ter \n
     local line_count = vim.api.nvim_buf_line_count(buf)
     local last = vim.api.nvim_buf_get_lines(buf, line_count - 1, line_count, false)[1] or ""
+    -- se buffer começou vazio (1 linha vazia), last == ""
     local parts = vim.split(delta, "\n", { plain = true })
     if #parts == 1 then
       vim.api.nvim_buf_set_lines(buf, line_count - 1, line_count, false, { last .. parts[1] })
@@ -93,6 +98,7 @@ local function handle(evt)
     return
   end
   if evt.type == "extension_ui_request" then
+    -- v1: ignora fire-and-forget, loga dialog se aparecer
     vim.schedule(function()
       vim.notify("[pi] extension_ui_request: " .. (evt.method or "?"), vim.log.levels.DEBUG)
     end)
@@ -113,6 +119,7 @@ local function handle(evt)
   elseif evt.type == "agent_settled" then
     state.is_streaming = false
     vim.schedule(function()
+      -- garante que float está visível no fim
       ensure_win()
     end)
   elseif evt.type == "extension_error" then
@@ -120,11 +127,14 @@ local function handle(evt)
       vim.notify("[pi] extension_error: " .. vim.inspect(evt), vim.log.levels.ERROR)
     end)
   end
+  -- demais eventos (turn_start, message_start, etc) ignorados na v1 mas já demultiplexados
 end
 
 local function on_stdout(_, data)
   if not data then return end
+  -- Neovim envia [''] no EOF, ignorar; também pode vir {'',''} em splits
   if #data == 1 and data[1] == "" then return end
+  -- data pode conter '' como sentinela de \n no fim; table.concat restaura framing exato
   local text = table.concat(data, "\n")
   state.stdout_buf = state.stdout_buf .. text
   while true do
@@ -154,8 +164,10 @@ end
 
 local function start()
   if is_alive() then return state.job_id end
+  -- limpar estado anterior
   state.stdout_buf = ""
   state.is_streaming = false
+  -- não limpar pending aqui: on_exit já limpou, mas se start foi chamado após falha
   state.job_id = vim.fn.jobstart({ "pi", "--mode", "rpc" }, {
     on_stdout = on_stdout,
     on_stderr = function(_, d)
@@ -236,7 +248,7 @@ end
 function M.get_state() return { job_id = state.job_id, is_streaming = state.is_streaming, buf = state.buf, win = state.win } end
 
 -- comandos
-vim.api.nvim_create_user_command("Pi", function(opts) M.prompt(opts.args) end, { nargs = "*", desc = "Enviar prompt ao pi" })
+vim.api.nvim_create_user_command("Pi", function(opts) require("core.pi_context").prompt_with_context(opts.args, { range = opts.range, line1 = opts.line1, line2 = opts.line2, count = opts.count }) end, { nargs = "*", range = true, desc = "Enviar prompt ao pi" })
 vim.api.nvim_create_user_command("PiAbort", function() M.abort() end, { desc = "Abortar geração pi" })
 vim.api.nvim_create_user_command("PiToggle", function() M.toggle() end, { desc = "Toggle float pi" })
 
