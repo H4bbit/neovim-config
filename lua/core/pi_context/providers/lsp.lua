@@ -58,7 +58,7 @@ function M.get(buf, cursor)
   local params = nil
   do
     local ok, p = pcall(vim.lsp.util.make_text_document_params, buf)
-    if ok then params = p end
+    if ok and p then params = { textDocument = p } end
   end
   if not params then return nil end
 
