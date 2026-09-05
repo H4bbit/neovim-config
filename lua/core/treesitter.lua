@@ -94,3 +94,24 @@ end
 -- Mapeamentos de Seleção Incremental
 vim.keymap.set({ "n", "x" }, "<leader>si", TS_Select.inc, { desc = "TS: Iniciar/Incrementar Seleção" })
 vim.keymap.set("x", "<leader>sd", TS_Select.dec, { desc = "TS: Decrementar Seleção" })
+
+-- Helpers compartilhados (side-effect free) para pi_context.providers.treesitter
+-- Reuso de baixo nível sem duplicar TS_Select / feedkeys / UI
+local Helpers = {}
+function Helpers.get_parser(buf)
+  local ok, parser = pcall(vim.treesitter.get_parser, buf)
+  if not ok or not parser then return nil end
+  return parser
+end
+function Helpers.get_node_at(buf, row, col)
+  -- row 0-index, col 0-index byte; garante parse
+  local parser = Helpers.get_parser(buf)
+  if parser then pcall(parser.parse, parser) end
+  local ok, node = pcall(vim.treesitter.get_node, { bufnr = buf, pos = { row, col }, ignore_injections = true })
+  if ok then return node end
+  return nil
+end
+-- expõe para require sem quebrar side-effects do arquivo
+-- mantém TS_Select global para compatibilidade
+_G.TS_Select = TS_Select
+return Helpers
