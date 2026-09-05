@@ -139,6 +139,16 @@ function M.get(bufnr, opts)
     end
   end
 
+  -- enriquecimento semântico LSP (aditivo, não substitui Tree-sitter)
+  local lsp = nil
+  if not sel then
+    local ok_p, provider = pcall(require, "core.pi_context.providers.lsp")
+    if ok_p and provider and provider.get then
+      local ok_s, res = pcall(provider.get, buf, cursor)
+      if ok_s and res and res.name and res.name ~= "" then lsp = res end
+    end
+  end
+
   -- snippet ao redor do cursor quando não há seleção nem estrutural
   local snippet = nil
   if not sel and not structural then
@@ -167,6 +177,7 @@ function M.get(bufnr, opts)
     cursor = cursor,             -- {line, col 1-based, col0}
     selection = sel,             -- nil ou {mode, range, lines, text, s, e}
     structural = structural,     -- nil ou {type, range, text, lang}
+    lsp = lsp,                   -- nil ou {name, kind, kind_name, range, detail}
     snippet = snippet,           -- nil ou {range, lines} quando sem seleção nem estrutural
   }
 end
@@ -215,6 +226,26 @@ function M.format(ctx, opts)
     end
     table.insert(out, "```")
     table.insert(out, "</snippet>")
+  end
+
+  if ctx.lsp and ctx.lsp.name and ctx.lsp.name ~= "" then
+    local name = ctx.lsp.name:gsub('"', "'")
+    local kind = (ctx.lsp.kind_name or tostring(ctx.lsp.kind or "")):gsub('"', "'")
+    local range = (ctx.lsp.range or ""):gsub('"', "'")
+    local detail = ctx.lsp.detail or ""
+    detail = detail:gsub('"', "'"):gsub("\n", " "):gsub("\r", "")
+    if #detail > 200 then detail = detail:sub(1, 200) .. "…" end
+    local container = ctx.lsp.container or ""
+    container = container:gsub('"', "'")
+    if detail ~= "" and container ~= "" then
+      table.insert(out, string.format('<symbol name="%s" kind="%s" range="%s" detail="%s" container="%s"/>', name, kind, range, detail, container))
+    elseif detail ~= "" then
+      table.insert(out, string.format('<symbol name="%s" kind="%s" range="%s" detail="%s"/>', name, kind, range, detail))
+    elseif container ~= "" then
+      table.insert(out, string.format('<symbol name="%s" kind="%s" range="%s" container="%s"/>', name, kind, range, container))
+    else
+      table.insert(out, string.format('<symbol name="%s" kind="%s" range="%s"/>', name, kind, range))
+    end
   end
 
   table.insert(out, "</context>")
