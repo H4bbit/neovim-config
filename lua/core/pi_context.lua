@@ -17,6 +17,69 @@ local function get_cursor()
   return { line = cur[1], col = cur[2] + 1, col0 = cur[2] }
 end
 
+local function get_selection(buf, opts)
+  local cur_mode = vim.fn.mode()
+  local has_range = opts and opts.range == 2 and opts.count and opts.count ~= -1
+  if has_range then
+    local vmode = vim.fn.visualmode()
+    if vmode == "" or vmode == nil then vmode = "v" end
+    local s = vim.fn.getpos("'<")
+    local e = vim.fn.getpos("'>")
+    if not s or not e or s[2] == 0 or e[2] == 0 then return nil end
+    local buf_id = buf or vim.api.nvim_get_current_buf()
+    local ok, lines = pcall(vim.fn.getregion, s, e, { type = vmode })
+    if not ok or not lines or #lines == 0 or (#lines == 1 and lines[1] == "") then return nil end
+    local s_line, s_col = s[2], s[3]
+    local e_line, e_col = e[2], e[3]
+    local range, mode_name = nil, vmode
+    if vmode == "V" then
+      if s_line == e_line then range = string.format("%d", s_line) else range = string.format("%d-%d", math.min(s_line,e_line), math.max(s_line,e_line)) end
+    elseif vmode == "\22" or vmode == "\x16" then
+      range = string.format("%d:%d-%d:%d", s_line, s_col, e_line, e_col); mode_name = "block"
+    else
+      range = string.format("%d:%d-%d:%d", s_line, s_col, e_line, e_col); mode_name = "v"
+    end
+    return { mode = mode_name, raw_mode = vmode, range = range, lines = lines, text = table.concat(lines, "\n"), s = { line = s_line, col = s_col }, e = { line = e_line, col = e_col } }
+  end
+  if cur_mode == "" or cur_mode == nil then return nil end
+  local b = cur_mode:byte(1)
+  local first = cur_mode:sub(1,1)
+  local is_visual = first == "v" or first == "V" or b == 22
+  if not is_visual then return nil end
+  local vmode = first
+  if b == 22 then vmode = "\22" end
+  local s = vim.fn.getpos("v")
+  local e = vim.fn.getpos(".")
+  if not s or not e then return nil end
+  if s[2] == 0 or e[2] == 0 then return nil end
+  local ok, lines = pcall(vim.fn.getregion, s, e, { type = vmode })
+  if not ok or not lines then return nil end
+  if #lines == 0 then return nil end
+  if #lines == 1 and lines[1] == "" then return nil end
+  local s_line, s_col = s[2], s[3]
+  local e_line, e_col = e[2], e[3]
+  local range
+  local mode_name = vmode
+  if vmode == "V" then
+    if s_line == e_line then range = string.format("%d", s_line) else range = string.format("%d-%d", math.min(s_line,e_line), math.max(s_line,e_line)) end
+  elseif vmode == "\22" or vmode == "\x16" then
+    range = string.format("%d:%d-%d:%d", s_line, s_col, e_line, e_col)
+    mode_name = "block"
+  else
+    range = string.format("%d:%d-%d:%d", s_line, s_col, e_line, e_col)
+    mode_name = "v"
+  end
+  return {
+    mode = mode_name,
+    raw_mode = vmode,
+    range = range,
+    lines = lines,
+    text = table.concat(lines, "\n"),
+    s = { line = s_line, col = s_col },
+    e = { line = e_line, col = e_col },
+  }
+end
+
 function M.get(bufnr, opts)
   if type(bufnr) == "table" and opts == nil then opts = bufnr; bufnr = nil end
   local buf = bufnr
@@ -27,12 +90,14 @@ function M.get(bufnr, opts)
   local display = rel_path(path)
   local ft = vim.bo[buf].filetype or ""
   local cursor = get_cursor()
+  local sel = get_selection(buf, opts)
   return {
     buf = buf,
     path = path,
     rel_path = display,
     filetype = ft,
     cursor = cursor,
+    selection = sel,
   }
 end
 
@@ -45,6 +110,17 @@ function M.format(ctx, opts)
   local cursor_str = string.format("%d:%d", ctx.cursor.line, ctx.cursor.col)
   local out = {}
   table.insert(out, string.format('<context file="%s" ft="%s" cursor="%s">', file_attr, ft, cursor_str))
+  if ctx.selection and ctx.selection.text and ctx.selection.text ~= "" then
+    local range = ctx.selection.range or ""
+    local mode = ctx.selection.mode or "v"
+    table.insert(out, string.format('<selection range="%s" mode="%s">', range, mode))
+    table.insert(out, string.format("```%s", ft ~= "" and ft or "text"))
+    for _, l in ipairs(ctx.selection.lines) do
+      table.insert(out, l)
+    end
+    table.insert(out, "```")
+    table.insert(out, "</selection>")
+  end
   table.insert(out, "</context>")
   return table.concat(out, "\n")
 end
