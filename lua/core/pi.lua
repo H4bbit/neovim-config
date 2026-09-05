@@ -35,7 +35,7 @@ local function ensure_win()
   if height < 10 then height = 10 end
   local row = math.floor((vim.o.lines - height) / 2)
   local col = math.floor((vim.o.columns - width) / 2)
-  state.win = vim.api.nvim_open_win(buf, false, {
+  state.win = vim.api.nvim_open_win(buf, true, {
     relative = "editor",
     width = width,
     height = height,
@@ -63,8 +63,15 @@ local function append(delta)
   -- usamos vim.schedule para garantir não bloquear callback rápido
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(buf) then return end
-    -- pega última linha atual para concatenar delta que pode não ter \n
+    -- decide autoscroll ANTES de inserir, baseado no estado atual da janela
     local line_count = vim.api.nvim_buf_line_count(buf)
+    local at_bottom = true
+    if state.win and vim.api.nvim_win_is_valid(state.win) then
+      local ok, cur = pcall(vim.api.nvim_win_get_cursor, state.win)
+      if ok and cur then
+        at_bottom = cur[1] == line_count
+      end
+    end
     local last = vim.api.nvim_buf_get_lines(buf, line_count - 1, line_count, false)[1] or ""
     -- se buffer começou vazio (1 linha vazia), last == ""
     local parts = vim.split(delta, "\n", { plain = true })
@@ -76,7 +83,7 @@ local function append(delta)
         vim.api.nvim_buf_set_lines(buf, line_count, -1, false, vim.list_slice(parts, 2, #parts))
       end
     end
-    if state.win and vim.api.nvim_win_is_valid(state.win) then
+    if at_bottom and state.win and vim.api.nvim_win_is_valid(state.win) then
       pcall(vim.api.nvim_win_set_cursor, state.win, { vim.api.nvim_buf_line_count(buf), 0 })
     end
     vim.cmd("redraw")
