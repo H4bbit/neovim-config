@@ -183,10 +183,12 @@ utils.autocmd("LspAttach", {
 		lmap("n", "<leader>lr", buf.rename, "Rename symbol")
 		lmap({ "n", "v" }, "<leader>la", buf.code_action, "Code actions")
 		lmap("n", "<leader>ld", buf.type_definition, "Go to type definition")
+		-- TODO: Verificar se múltiplos formatadores podem causar comportamento
+		-- inesperado neste mapeamento e, se necessário, aplicar a mesma política
+		-- usada no Format on Save.
 		lmap("n", "<leader>lf", function()
 			buf.format({ async = true })
 		end, "Format buffer")
-
 		-- Workspace
 		lmap("n", "<leader>wa", buf.add_workspace_folder, "Add workspace folder")
 		lmap("n", "<leader>wr", buf.remove_workspace_folder, "Remove workspace folder")
