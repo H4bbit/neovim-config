@@ -56,6 +56,7 @@ require("core.fzf")
 require("core.trouble")
 require("core.lualine")
 
+require("core.pi")
 require("core.keymaps")
 
 -- Plugins sem módulo próprio
