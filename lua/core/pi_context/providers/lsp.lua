@@ -14,7 +14,9 @@ local function in_range(range, row, col)
   local e = range["end"]
   -- LSP: start inclusive, end exclusive; row/col 0-index
   if row < s.line or row > e.line then return false end
-  if row == s.line and col < s.character then return false end
+  if row == s.line and s.line == e.line and col < s.character then
+    return false
+  end
   if row == e.line and col >= e.character then
     -- on end line, character at/after end => outside (exclusive)
     -- exceção: se range é de linha única e col == e.character, fora
