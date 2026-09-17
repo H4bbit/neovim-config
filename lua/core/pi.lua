@@ -3,6 +3,9 @@
 
 local M = {}
 
+M.extension_path = vim.fn.stdpath("config") .. "/extensions/pi-nvim-ext.ts"
+M.session_dir = vim.fn.stdpath("data") .. "/pi/sessions"
+
 local state = {
   job_id = nil,
   buf = nil,
@@ -169,13 +172,24 @@ local function is_alive()
   return ok and info ~= nil and info.id ~= nil
 end
 
+local function build_command()
+	local cmd = { "pi", "--mode", "rpc", "-n", "neovim" }
+	if M.extension_path then
+		table.insert(cmd, "-e")
+		table.insert(cmd, M.extension_path)
+	end
+	table.insert(cmd, "--session-dir")
+	table.insert(cmd, M.session_dir)
+	return cmd
+end
+
 local function start()
   if is_alive() then return state.job_id end
   -- limpar estado anterior
   state.stdout_buf = ""
   state.is_streaming = false
   -- não limpar pending aqui: on_exit já limpou, mas se start foi chamado após falha
-  state.job_id = vim.fn.jobstart({ "pi", "--mode", "rpc" }, {
+  state.job_id = vim.fn.jobstart(build_command(), {
     on_stdout = on_stdout,
     on_stderr = function(_, d)
       local m = table.concat(d, "\n")
