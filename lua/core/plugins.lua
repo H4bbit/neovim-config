@@ -76,6 +76,15 @@ require("pckr").add({
 	"saadparwaiz1/cmp_luasnip",
 	"rafamadriz/friendly-snippets",
 	"arkav/lualine-lsp-progress",
+	-- Tree-sitter (branch main, Nvim >= 0.12) — smoke test: rust, typescript, tsx
+	{
+		"nvim-treesitter/nvim-treesitter",
+		branch = "main",
+		run = ":TSUpdate",
+		config = function()
+			require("nvim-treesitter").install({ "rust", "typescript", "tsx" })
+		end,
+	},
 	-- Linguagens Específicas
 	"vim-crystal/vim-crystal",
 	"rust-lang/rust.vim",
