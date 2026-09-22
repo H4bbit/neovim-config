@@ -76,13 +76,40 @@ require("pckr").add({
 	"saadparwaiz1/cmp_luasnip",
 	"rafamadriz/friendly-snippets",
 	"arkav/lualine-lsp-progress",
-	-- Tree-sitter (branch main, Nvim >= 0.12) — smoke test: rust, typescript, tsx
+	-- Tree-sitter (branch main, Nvim >= 0.12)
 	{
 		"nvim-treesitter/nvim-treesitter",
 		branch = "main",
 		run = ":TSUpdate",
 		config = function()
-			require("nvim-treesitter").install({ "rust", "typescript", "tsx" })
+			local ensure_installed = {
+				"bash",
+				"c",
+				"cpp",
+				"elm",
+				"javascript",
+				"json",
+				"lua",
+				"markdown",
+				"markdown_inline",
+				"python",
+				"query",
+				"rust",
+				"toml",
+				"tsx",
+				"typescript",
+				"vim",
+				"vimdoc",
+			}
+			local installed = require("nvim-treesitter.config").get_installed()
+			local missing = vim.iter(ensure_installed)
+				:filter(function(lang)
+					return not vim.tbl_contains(installed, lang)
+				end)
+				:totable()
+			if #missing > 0 then
+				require("nvim-treesitter").install(missing)
+			end
 		end,
 	},
 	-- Linguagens Específicas

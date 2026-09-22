@@ -1,10 +1,8 @@
 -- =========================================================================
--- Configuração Nativa do Tree-sitter (Neovim >= 0.12)
+-- Configuração Tree-sitter (Neovim >= 0.12 + nvim-treesitter@main)
 -- =========================================================================
--- Registra um handler falso para o predicado is-not? evitando crash com queries upstream
-vim.treesitter.query.add_predicate("is-not?", function()
-	return true
-end, { force = true })
+-- O plugin nvim-treesitter (branch main) cuida SÓ de instalar parsers e
+-- entregar queries. Highlight/folds/indent precisam ser ativados aqui.
 
 local max_filesize = 100 * 1024 -- 100 KB
 
@@ -28,69 +26,50 @@ vim.api.nvim_create_autocmd({ "FileType", "BufEnter" }, {
 	end,
 })
 
--- 2. Identação
--- O Neovim >= 0.10 já utiliza queries do Tree-sitter internamente para
--- os arquivos de runtime de indentação padrão. Apenas garanta que o smartindent esteja ligado.
-vim.opt.smartindent = true
+-- 2. Indentação
+-- Langs COM query de indent no nvim-treesitter@main usam o indentexpr do
+-- plugin (experimental, mas é o suportado). Langs SEM query (elm, vim,
+-- vimdoc, markdown_inline) caem no fallback smartindent.
+local ts_indent_langs = {
+	bash = true,
+	c = true,
+	cpp = true,
+	javascript = true,
+	json = true,
+	lua = true,
+	markdown = true,
+	python = true,
+	query = true,
+	rust = true,
+	toml = true,
+	tsx = true,
+	typescript = true,
+}
 
--- 3. Seleção Incremental Nativa
--- Como não temos mais o plugin, implementamos a lógica de seleção de nós com a API nativa
-local TS_Select = {}
-TS_Select.node_stack = {}
+vim.opt.smartindent = true -- fallback para langs sem query de indent
 
-function TS_Select.inc()
-	local mode = vim.fn.mode()
-	local buf = vim.api.nvim_get_current_buf()
-
-	if mode ~= "v" and mode ~= "V" and mode ~= "\22" then
-		-- Inicia a seleção (init_selection)
-		local node = vim.treesitter.get_node()
-		if not node then
-			return
+vim.api.nvim_create_autocmd("FileType", {
+	group = vim.api.nvim_create_augroup("TreesitterIndent", { clear = true }),
+	callback = function(args)
+		local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+		if lang and ts_indent_langs[lang] then
+			vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 		end
-		TS_Select.node_stack = { node }
-		TS_Select.apply_selection(node)
-	else
-		-- Incrementa a seleção (node_incremental)
-		local current_node = TS_Select.node_stack[#TS_Select.node_stack]
-		if not current_node then
-			return
-		end
-		local parent = current_node:parent()
-		if parent then
-			table.insert(TS_Select.node_stack, parent)
-			TS_Select.apply_selection(parent)
-		end
-	end
-end
+	end,
+})
 
-function TS_Select.dec()
-	local mode = vim.fn.mode()
-	if (mode ~= "v" and mode ~= "V" and mode ~= "\22") or #TS_Select.node_stack <= 1 then
-		return
-	end
-	-- Decrementa a seleção (node_decremental)
-	table.remove(TS_Select.node_stack)
-	local prev_node = TS_Select.node_stack[#TS_Select.node_stack]
-	TS_Select.apply_selection(prev_node)
-end
-
-function TS_Select.apply_selection(node)
-	local sr, sc, er, ec = node:range()
-	-- Sai do modo visual temporariamente para redefinir a seleção
-	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-
-	vim.schedule(function()
-		vim.api.nvim_win_set_cursor(0, { sr + 1, sc })
-		vim.cmd("normal! v")
-		if ec == 0 then
-			vim.api.nvim_win_set_cursor(0, { er, vim.fn.col({ er, "$" }) - 1 })
-		else
-			vim.api.nvim_win_set_cursor(0, { er + 1, ec - 1 })
-		end
-	end)
-end
-
--- Mapeamentos de Seleção Incremental
-vim.keymap.set({ "n", "x" }, "<leader>si", TS_Select.inc, { desc = "TS: Iniciar/Incrementar Seleção" })
-vim.keymap.set("x", "<leader>sd", TS_Select.dec, { desc = "TS: Decrementar Seleção" })
+-- 3. Seleção incremental — API nativa (vim.treesitter.select)
+-- Cobre o mesmo uso do TS_Select antigo (expandir/encolher seleção por nós)
+-- mais navegação entre siblings, sem pilha manual nem feedkeys agendado.
+vim.keymap.set({ "n", "x" }, "<leader>si", function()
+	vim.treesitter.select("parent")
+end, { desc = "TS: Expandir seleção (nó pai)" })
+vim.keymap.set("x", "<leader>sd", function()
+	vim.treesitter.select("child")
+end, { desc = "TS: Encolher seleção (nó filho)" })
+vim.keymap.set({ "n", "x" }, "<leader>sn", function()
+	vim.treesitter.select("next")
+end, { desc = "TS: Selecionar próximo irmão" })
+vim.keymap.set({ "n", "x" }, "<leader>sp", function()
+	vim.treesitter.select("prev")
+end, { desc = "TS: Selecionar irmão anterior" })
